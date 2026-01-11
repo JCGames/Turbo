@@ -1,0 +1,24 @@
+﻿using Turbo.Language.Parsing.Nodes.Classifications;
+
+namespace Turbo.Language.Parsing.Nodes;
+
+public class AccessorNode : TokenNode, IParameterNode
+{
+    public List<IdentifierNode> Identifiers { get; set; }
+    
+    public override void Print(string indent, TextWriter? writer = null)
+    {
+        writer ??= Console.Out;
+        writer.WriteLine($"{indent}[{nameof(AccessorNode)}]:");
+        writer?.WriteLine($"{indent}[");
+        
+        foreach (var identifier in Identifiers)
+        {
+            identifier.Print(indent + '\t', writer);
+        }
+        
+        writer?.WriteLine($"{indent}]");
+    }
+
+    public string PublicParameterName => "accessor";
+}

@@ -1,10 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
-using Lisp;
-using Lisp.Diagnostics;
-using Lisp.Parsing;
+using Turbo.Language.Diagnostics;
+using Turbo.Language.Parsing;
+using Turbo.Language.Runtime;
 
-namespace TurboTests;
+namespace Turbo.Tests;
 
 public static class TestTools
 {

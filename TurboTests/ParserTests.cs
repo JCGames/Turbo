@@ -1,7 +1,7 @@
-﻿using Lisp.Diagnostics;
-using Lisp.Parsing;
+﻿using Turbo.Language.Diagnostics;
+using Turbo.Language.Parsing;
 
-namespace TurboTests;
+namespace Turbo.Tests;
 
 [TestClass]
 public class ParserTests

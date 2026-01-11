@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        
+        <AssemblyName>Turbo.Language</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Update="main.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+
+      <None Update="Runtime\StandardLibrary\prelude.lisp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+
+      <None Update="Runtime\StandardLibrary\boolean.lisp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+
+      <None Update="Runtime\StandardLibrary\math.lisp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+
+      <None Update="lib.lisp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+
+      <None Update="Runtime\StandardLibrary\collections.lisp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>

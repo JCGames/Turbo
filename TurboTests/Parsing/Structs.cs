@@ -1,6 +1,6 @@
-using Lisp.Parsing;
+using Turbo.Language.Parsing;
 
-namespace TurboTests.Parsing;
+namespace Turbo.Tests.Parsing;
 
 [TestClass]
 public class Structs

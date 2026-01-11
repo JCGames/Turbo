@@ -5,6 +5,9 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        
+        <AssemblyName>Turbo.Tests</AssemblyName>
+        <RootNamespace>$(AssemblyName)</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Lisp\Lisp.csproj" />
+      <ProjectReference Include="..\Turbo\Turbo.csproj" />
     </ItemGroup>
 
 </Project>
