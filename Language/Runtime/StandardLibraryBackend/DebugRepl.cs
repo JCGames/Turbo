@@ -40,7 +40,7 @@ public class DebugRepl : ITurboFunction
                 }
 
                 var parser = new Parser(new(line));
-                var command = parser.Parse();
+                var command = parser.ParseFile();
                 BaseLispValue value = LispVoidValue.Instance;
                 foreach (var node in command)
                 {

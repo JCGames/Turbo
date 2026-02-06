@@ -1,18 +1,23 @@
-﻿using Turbo.Language.Parsing;
+﻿using Turbo.Language.Diagnostics;
+using Turbo.Language.Parsing;
 using Turbo.Language.Runtime;
 
-var standardLibrary = new SourceFile(new FileInfo("Runtime/StandardLibrary/prelude.lisp"));
+Report.PreferThrownErrors = true;
+
+// var standardLibrary = new SourceFile(new FileInfo("Runtime/StandardLibrary/prelude.lisp"));
 var sourceFile = new SourceFile(new FileInfo("main.txt"));
 
-var parserStandardLibrary = new Parser(standardLibrary);
+// var parserStandardLibrary = new Parser(standardLibrary);
 var parser = new Parser(sourceFile);
 
-var standardLibraryList = parserStandardLibrary.Parse();
-var list = parser.Parse();
+// var standardLibraryList = parserStandardLibrary.ParseFile();
+var list = parser.ParseFile();
 
-// foreach (var listNode in list)
-// {
-//     listNode.Print("", Console.Out);
-// }
+foreach (var listNode in list)
+{
+    listNode.Print("", Console.Out);
+}
 
-Runner.Run([..standardLibraryList, ..list]);
+// Runner.Run([..standardLibraryList, ..list]);
+
+Runner.Run(list);

@@ -177,7 +177,7 @@ public class SourceFile : IReadOnlySourceFile
 
     private bool IsEndOfFile()
     {
-        return _currentIndex >= _text.Length;
+        return _currentIndex >= _text.Length || _text[_currentIndex] is '\0';
     }
     
     private LineEndingStyle GetCurrentLineEnding()

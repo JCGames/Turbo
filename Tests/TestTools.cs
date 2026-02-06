@@ -19,8 +19,8 @@ public static class TestTools
         var parserStandardLibrary = new Parser(standardLibraryFile);
         var parser = new Parser(sourceFile);
         
-        var standardLibrary = parserStandardLibrary.Parse();
-        var program = parser.Parse();
+        var standardLibrary = parserStandardLibrary.ParseFile();
+        var program = parser.ParseFile();
         
         Runner.Run([..standardLibrary, ..program]);
         

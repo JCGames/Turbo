@@ -18,7 +18,7 @@ public class Structs
                     just-one-more-test: (lambda () (print "ok, this is crazy"))}})
             """));
         
-        var result = parser.Parse();
+        var result = parser.ParseFile();
         Assert.IsNotNull(result);
         Assert.IsTrue(result.Count != 0);
     }

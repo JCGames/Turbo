@@ -33,7 +33,14 @@ public static class Report
 
             Console.WriteLine("|");
             Console.WriteLine($"| {line.ToString()}");
-            Console.WriteLine("|");
+            Console.Write("| ");
+
+            for (var i = 0; i < column; i++)
+            {
+                Console.Write(' ');
+            }
+            
+            Console.WriteLine('^');
         }
         else
         {

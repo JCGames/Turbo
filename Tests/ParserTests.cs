@@ -22,7 +22,7 @@ public class ParserTests
             """
         ));
         
-        var result = parser.Parse();
+        var result = parser.ParseFile();
 
         result.First().Print("", Console.Out);
     }

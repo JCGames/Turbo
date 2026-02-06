@@ -33,7 +33,7 @@ public class Import : ITurboFunction
         
         var sourceFile = new SourceFile(new FileInfo(path));
         var parser = new Parser(sourceFile);
-        var lispListList = parser.Parse();
+        var lispListList = parser.ParseFile();
 
         foreach (var lispList in lispListList)
         {
