@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Turbo", "Turbo\Turbo.csproj", "{8C4B8A96-6598-40DB-A7B0-D606223BBE7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Language", "Language\Language.csproj", "{8C4B8A96-6598-40DB-A7B0-D606223BBE7E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{34876539-40C0-4AA3-8966-AA34E8E6F125}"
 EndProject

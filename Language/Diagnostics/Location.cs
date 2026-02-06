@@ -12,7 +12,7 @@ public class Location
         End = -1
     };
 
-    public static Location New(SourceFile sourceFile)
+    public static Location New(IReadOnlySourceFile sourceFile)
     {
         return new Location
         {
@@ -23,7 +23,7 @@ public class Location
         };
     }
     
-    public required SourceFile? SourceFile { get; set; }
+    public required IReadOnlySourceFile? SourceFile { get; set; }
     public required int Line { get; set; }
     public required int Start { get; set; }
     public required int End { get; set; }

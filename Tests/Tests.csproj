@@ -21,13 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="TestSourceFile.lisp">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Turbo\Turbo.csproj" />
+      <ProjectReference Include="..\Language\Language.csproj" />
     </ItemGroup>
 
 </Project>
