@@ -165,13 +165,13 @@ public class SourceFile : IReadOnlySourceFile
     
     private char PeekNextCharacter()
     {
-        if (_currentIndex + 1 < 0 || _currentIndex + 1 >= _lines.Count) return '\0';
+        if (_currentIndex + 1 < 0 || _currentIndex + 1 >= _text.Length) return '\0';
         return _text[_currentIndex + 1];
     }
     
     private char PeekCurrentCharacter()
     {
-        if (_currentIndex < 0 || _currentIndex >= _lines.Count) throw new IndexOutOfRangeException("Failed to get the current character of the source file.");
+        if (_currentIndex < 0 || _currentIndex >= _text.Length) throw new IndexOutOfRangeException("Failed to get the current character of the source file.");
         return _text[_currentIndex];
     }
 

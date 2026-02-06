@@ -21,15 +21,15 @@ public static class Report
         
         var column = location.End - location.Start;
 
-        Console.BackgroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = ConsoleColor.Red;
         
         if (location.SourceFile is { } sourceFile)
         {
             var line = sourceFile.GetLineSpan(location.Line);
 
             Console.WriteLine(sourceFile.FileInfo is not null
-                ? $"Error {sourceFile.FileInfo?.Name}:{location.Line}:{column}: {message}"
-                : $"Error ?:{location.Line}:{column} {message}");
+                ? $"Error {sourceFile.FileInfo?.FullName}:{location.Line}:{column}:\n|   {message}"
+                : $"Error ?:{location.Line}:{column}\n|   {message}");
 
             Console.WriteLine("|");
             Console.WriteLine($"| {line.ToString()}");
@@ -37,7 +37,7 @@ public static class Report
         }
         else
         {
-            Console.WriteLine($"Error ?:{location.Line}:{column} {message}");
+            Console.WriteLine($"Error ?:{location.Line}:{column}\n|   {message}");
         }
         
         Console.ResetColor();
