@@ -171,6 +171,10 @@ public class SourceFile : IReadOnlySourceFile
     
     private char PeekCurrentCharacter()
     {
+        // this is supposed to throw
+        // i know it is annoying sometimes
+        // but it is important fix your code
+        // if it causes this to throw
         if (_currentIndex < 0 || _currentIndex >= _text.Length) throw new IndexOutOfRangeException("Failed to get the current character of the source file.");
         return _text[_currentIndex];
     }
