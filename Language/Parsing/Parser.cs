@@ -35,7 +35,7 @@ public class Parser
                 continue;
             }
             
-            list.Add(ParseList());
+            list.Add(ParseListNode());
             
             _sourceFile.MoveToNonWhiteSpaceCharacter();
         }
@@ -43,16 +43,18 @@ public class Parser
         return list;
     }
 
-    private Node ParseLispOrSymbolOrStructNode()
+    private Node ParseNextInList()
     {
         return _sourceFile.Current switch
         {
-            '(' or '\'' => ParseList(),
-            _ => ParseSymbol()
+            '(' => ParseListNode(),
+            '\'' when _sourceFile.Peek is '(' => ParseListNode(),
+            '\'' => ParseSymbolNode(),
+            _ => ParseIdentifierNode()
         };
     }
     
-    private ListNode ParseList()
+    private ListNode ParseListNode()
     {
         var listNode = new ListNode
         {
@@ -71,14 +73,14 @@ public class Parser
         }
         else if (_sourceFile.Current is not '(')
         {
-            Report.Error("Expected a lisp.", Location.New(_sourceFile));
+            Report.Error("Expected a list.", Location.New(_sourceFile));
         }
         
         _sourceFile.MoveToNonWhiteSpaceCharacter();
         
         while (!_sourceFile.EndOfFile)
         {
-            listNode.Nodes.Add(ParseLispOrSymbolOrStructNode());
+            listNode.Nodes.Add(ParseNextInList());
             
             _sourceFile.MoveToNonWhiteSpaceCharacter();
 
@@ -100,10 +102,49 @@ public class Parser
         return listNode;
     }
 
-    private IdentifierNode ParseSymbol()
+    private IdentifierNode ParseIdentifierNode()
     {
-        var symbol = string.Empty;
         var location = Location.New(_sourceFile);
+        
+        if (char.IsWhiteSpace(_sourceFile.Current))
+        {
+            Report.Error("Expected something other than whitespace.", location);
+        }
+        
+        var identifier = string.Empty;
+
+        while (!_sourceFile.EndOfFile)
+        {
+            identifier += _sourceFile.Current;
+
+            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is '(' or ')') break;
+            
+            _sourceFile.MoveNext();
+        }
+
+        return new IdentifierNode
+        {
+            Location = location,
+            Text = identifier
+        };
+    }
+    
+    private SymbolNode ParseSymbolNode()
+    {
+        if (_sourceFile.Current is not '\'')
+        {
+            Report.Error("Expected a symbol.", Location.New(_sourceFile));
+        }
+        
+        _sourceFile.MoveNext();
+
+        if (char.IsWhiteSpace(_sourceFile.Current))
+        {
+            Report.Error("Symbols should start right after their declaration.", Location.New(_sourceFile));
+        }
+        
+        var location = Location.New(_sourceFile);
+        var symbol = string.Empty;
 
         while (!_sourceFile.EndOfFile)
         {
@@ -114,7 +155,7 @@ public class Parser
             _sourceFile.MoveNext();
         }
 
-        return new IdentifierNode
+        return new SymbolNode
         {
             Location = location,
             Text = symbol

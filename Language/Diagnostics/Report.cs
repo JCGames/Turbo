@@ -18,8 +18,6 @@ public static class Report
     public static Exception Error(string message, Location? location = null)
     {
         location ??= Location.None;
-        
-        var column = location.End - location.Start;
 
         Console.ForegroundColor = ConsoleColor.Red;
         
@@ -27,6 +25,9 @@ public static class Report
         {
             var line = sourceFile.GetLineSpan(location.Line);
 
+            var (lineStart, lineEnd) = sourceFile.GetLineStartAndEnd(location.Line);
+            var column = Math.Min(location.Start, lineEnd) - lineStart;
+            
             Console.WriteLine(sourceFile.FileInfo is not null
                 ? $"Error {sourceFile.FileInfo?.FullName}:{location.Line}:{column}:\n|   {message}"
                 : $"Error ?:{location.Line}:{column}\n|   {message}");
@@ -44,7 +45,7 @@ public static class Report
         }
         else
         {
-            Console.WriteLine($"Error ?:{location.Line}:{column}\n|   {message}");
+            Console.WriteLine($"Error ?:{location.Line}\n|   {message}");
         }
         
         Console.ResetColor();
