@@ -3,4 +3,7 @@
 ; a
 ; comment
 
-(Turbo:Print "")
+({
+    name: "bob"
+    hill: "florida"
+})

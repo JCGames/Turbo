@@ -4,7 +4,7 @@ namespace Turbo.Language.Parsing.Nodes;
 
 public class StructNode : Node, IEnumerable<KeyValueNode>
 {
-    public List<KeyValueNode> Struct { get; set; }
+    public List<KeyValueNode> Struct { get; set; } = [];
     
     public override void Print(string indent, TextWriter? writer = null)
     {

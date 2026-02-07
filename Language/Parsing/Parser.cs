@@ -3,6 +3,12 @@ using Turbo.Language.Parsing.Nodes;
 
 namespace Turbo.Language.Parsing;
 
+// =================================================
+//                  IMPORTANT
+// CurrentIndex of _sourceFile should always land on
+// the last character of the thing you are parsing
+// =================================================
+
 public class Parser
 {
     private readonly SourceFile _sourceFile;
@@ -40,6 +46,18 @@ public class Parser
         return list;
     }
 
+    private Node ParseAny() => _sourceFile.Current switch
+    {
+        '(' => ParseList(),
+        '\'' when _sourceFile.Peek is '(' => ParseList(),
+        '\'' => ParseSymbol(),
+        '"' => ParseStringLiteral(),
+        ';' => ParseSingleLineComment(),
+        '{' => ParseStruct(),
+        var c when char.IsNumber(c) || c is '.' => ParseNumber(),
+        _ => ParseIdentifier()
+    };
+    
     private SingleLineCommentNode ParseSingleLineComment()
     {
         var location = Location.New(_sourceFile);
@@ -97,16 +115,7 @@ public class Parser
         {
             while (!_sourceFile.EndOfFile)
             {
-                listNode.Nodes.Add(_sourceFile.Current switch
-                {
-                    '(' => ParseList(),
-                    '\'' when _sourceFile.Peek is '(' => ParseList(),
-                    '\'' => ParseSymbol(),
-                    '"' => ParseStringLiteral(),
-                    ';' => ParseSingleLineComment(),
-                    var c when char.IsNumber(c) || c is '.' => ParseNumber(),
-                    _ => ParseIdentifier()
-                });
+                listNode.Nodes.Add(ParseAny());
             
                 _sourceFile.MoveToNonWhiteSpaceCharacter();
 
@@ -166,6 +175,8 @@ public class Parser
             _sourceFile.MoveNext();
         }
 
+        location.End = _sourceFile.CurrentIndex;
+        
         return new NumberLiteralNode
         {
             Location = location,
@@ -283,5 +294,55 @@ public class Parser
             Location = location,
             Text = symbol
         };
+    }
+
+    private StructNode ParseStruct()
+    {
+        var @struct = new StructNode
+        {
+            Location = Location.New(_sourceFile)
+        };
+
+        if (_sourceFile.Current is not '{')
+        {
+            Report.Error("Expected a struct.", @struct.Location);
+        }
+        
+        _sourceFile.MoveToNonWhiteSpaceCharacter();
+
+        while (!_sourceFile.EndOfFile)
+        {
+            if (_sourceFile.Current is '}') break;
+
+            var identifier = ParseIdentifier();
+            _sourceFile.MoveToNonWhiteSpaceCharacter();
+            
+            if (!identifier.Text.EndsWith(':'))
+            {
+                Report.Error("Expected a key for the struct value.", identifier.Location);
+                break;
+            }
+
+            identifier.Text = identifier.Text[..^1];
+
+            var value = ParseAny();
+            _sourceFile.MoveToNonWhiteSpaceCharacter();
+
+            @struct.Struct.Add(new KeyValueNode
+            {
+                Location = identifier.Location,
+                Key = identifier,
+                Value = value
+            });
+        }
+
+        if (_sourceFile.Current is not '}')
+        {
+            Report.Error("Expected struct to end with a closing bracket.", @struct.Location);
+        }
+        
+        @struct.Location.End = _sourceFile.CurrentIndex;
+
+        return @struct;
     }
 }
