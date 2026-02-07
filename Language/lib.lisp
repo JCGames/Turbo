@@ -1,1 +1,2 @@
-(def a 1)
+(def say (lambda (x) 
+   (print x)))

@@ -1,3 +1,11 @@
 ﻿(import "lib.lisp")
 
-(print a)
+(say "Hello, world")
+
+(let myNum 10,000)
+
+(print "Before: " myNum)
+
+(let myNum (inc myNum))
+
+(print "After: " myNum)

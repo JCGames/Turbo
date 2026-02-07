@@ -79,7 +79,7 @@ public class Parser
             if (_sourceFile.IsNewLine) break;
         }
 
-        location.End = _sourceFile.Current;
+        location.End = _sourceFile.CurrentIndex;
 
         return new SingleLineCommentNode
         {
