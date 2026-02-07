@@ -29,7 +29,7 @@ public static class Report
             var column = Math.Min(location.Start, lineEnd) - lineStart;
             
             Console.WriteLine(sourceFile.FileInfo is not null
-                ? $"Error {sourceFile.FileInfo?.FullName}:{location.Line}:{column}:\n|   {message}"
+                ? $"Error {sourceFile.FileInfo?.FullName}:{location.Line}:{column}\n|   {message}"
                 : $"Error ?:{location.Line}:{column}\n|   {message}");
 
             Console.WriteLine("|");

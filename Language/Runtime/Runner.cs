@@ -10,14 +10,17 @@ public static class Runner
 {
     public static TextWriter StdOut = Console.Out;
     public static TextReader StdIn = Console.In;
-    public static void Run(List<ListNode> list)
+    public static void Run(List<Node> nodes)
     {
         var scope = new LispScope();
         InitializeGlobalScope(scope);
         
-        foreach (var lispList in list)
+        foreach (var node in nodes)
         {
-            ExecuteList(lispList, scope);
+            if (node is ListNode list)
+            {
+                ExecuteList(list, scope);
+            }
         }
     }
 

@@ -1,8 +1,7 @@
-﻿; ✓ we want structures (dictionaries)
-; ✓ we want d̶o̶t̶ accessors
-; we want labeled parameters
-; we want variadic args
-; we want w̶i̶n̶d̶o̶w̶i̶n̶g̶ ̶g̶r̶a̶p̶h̶i̶c̶s̶ terminal interface library
-; *     we want reactivity
+﻿; this
+; is
+; a
+; comment
 
-(Turbo:Print 'hello ' 'goodbye)
+(Turbo:Print ; "Hello, world"
+)

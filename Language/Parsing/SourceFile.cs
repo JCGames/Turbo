@@ -55,24 +55,23 @@ public class SourceFile : IReadOnlySourceFile
     public void MoveNext()
     {
         if (_currentIndex >= _text.Length) return;
+        if (TryMovePastNewLine()) return;
 
         _currentIndex++;
-
-        // if we get to the end of a line GetCurrentLineEnding
-        // will return something other than LineEndingStyle.None
-        // which can help us determine how many characters to skip
         
-        var lineEnding = GetCurrentLineEnding();
-        if (lineEnding is LineEndingStyle.None)
-        {
-            return;
-        }
-        
-        _currentIndex = lineEnding is LineEndingStyle.Windows
-            ? Math.Min(_currentIndex + 2, _text.Length)
-            : Math.Min(_currentIndex + 1, _text.Length);
+        // if we land on a new line move past it
+        TryMovePastNewLine();
+    }
 
-        _currentLineNumber++;
+    /// <summary>
+    /// Move to the next character in the source file and don't skip over new lines instantly.
+    /// </summary>
+    public void MoveNextAndRespectNewLines()
+    {
+        if (_currentIndex >= _text.Length) return;
+        if (TryMovePastNewLine()) return;
+
+        _currentIndex++;
     }
 
     /// <summary>
@@ -161,6 +160,24 @@ public class SourceFile : IReadOnlySourceFile
         return span.EndsWith("\r\n")
             ? (_lines[line].start, _lines[line].end - 2)
             : (_lines[line].start, _lines[line].end - 1);
+    }
+
+    private bool TryMovePastNewLine()
+    {
+        // if we get to the end of a line GetCurrentLineEnding
+        // will return something other than LineEndingStyle.None
+        // which can help us determine how many characters to skip
+        
+        var lineEnding = GetCurrentLineEnding();
+        if (lineEnding is LineEndingStyle.None) return false;
+        
+        _currentIndex = lineEnding is LineEndingStyle.Windows
+            ? Math.Min(_currentIndex + 2, _text.Length)
+            : Math.Min(_currentIndex + 1, _text.Length);
+
+        _currentLineNumber++;
+
+        return true;
     }
     
     private char PeekNextCharacter()

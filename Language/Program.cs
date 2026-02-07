@@ -11,13 +11,13 @@ var sourceFile = new SourceFile(new FileInfo("main.txt"));
 var parser = new Parser(sourceFile);
 
 // var standardLibraryList = parserStandardLibrary.ParseFile();
-var list = parser.ParseFile();
+var nodes = parser.ParseFile();
 
-foreach (var listNode in list)
+foreach (var node in nodes)
 {
-    listNode.Print("", Console.Out);
+    node.Print("", Console.Out);
 }
 
 // Runner.Run([..standardLibraryList, ..list]);
 
-Runner.Run(list);
+Runner.Run(nodes);

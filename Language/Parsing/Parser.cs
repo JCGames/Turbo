@@ -1,4 +1,6 @@
-﻿using Turbo.Language.Diagnostics;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using Turbo.Language.Diagnostics;
 using Turbo.Language.Parsing.Nodes;
 
 namespace Turbo.Language.Parsing;
@@ -15,11 +17,11 @@ public class Parser
         _sourceFile = sourceFile;
     }
 
-    public List<ListNode> ParseFile()
+    public List<Node> ParseFile()
     {
         _sourceFile.MoveNext();
         
-        var list = new List<ListNode>();
+        var list = new List<Node>();
 
         while (!_sourceFile.EndOfFile)
         {
@@ -31,11 +33,11 @@ public class Parser
 
             if (_sourceFile.Current is ';')
             {
-                _sourceFile.MoveToNextLine();
+                list.Add(ParseSingleLineComment());
                 continue;
             }
             
-            list.Add(ParseListNode());
+            list.Add(ParseList());
             
             _sourceFile.MoveToNonWhiteSpaceCharacter();
         }
@@ -43,18 +45,36 @@ public class Parser
         return list;
     }
 
-    private Node ParseNextInList()
+    private SingleLineCommentNode ParseSingleLineComment()
     {
-        return _sourceFile.Current switch
+        var location = Location.New(_sourceFile);
+        
+        if (_sourceFile.Current is not ';')
         {
-            '(' => ParseListNode(),
-            '\'' when _sourceFile.Peek is '(' => ParseListNode(),
-            '\'' => ParseSymbolNode(),
-            _ => ParseIdentifierNode()
+            Report.Error("Expected a single line comment.", location);
+        }
+
+        var comment = string.Empty;
+        
+        while (!_sourceFile.EndOfFile)
+        {
+            comment += _sourceFile.Current;
+            
+            _sourceFile.MoveNextAndRespectNewLines();
+            
+            if (_sourceFile.IsNewLine) break;
+        }
+
+        location.End = _sourceFile.Current;
+
+        return new SingleLineCommentNode
+        {
+            Location = location,
+            Text = comment
         };
     }
     
-    private ListNode ParseListNode()
+    private ListNode ParseList()
     {
         var listNode = new ListNode
         {
@@ -80,7 +100,15 @@ public class Parser
         
         while (!_sourceFile.EndOfFile)
         {
-            listNode.Nodes.Add(ParseNextInList());
+            listNode.Nodes.Add(_sourceFile.Current switch
+            {
+                '(' => ParseList(),
+                '\'' when _sourceFile.Peek is '(' => ParseList(),
+                '\'' => ParseSymbol(),
+                '"' => ParseStringLiteral(),
+                ';' => ParseSingleLineComment(),
+                _ => ParseIdentifier()
+            });
             
             _sourceFile.MoveToNonWhiteSpaceCharacter();
 
@@ -102,7 +130,43 @@ public class Parser
         return listNode;
     }
 
-    private IdentifierNode ParseIdentifierNode()
+    private StringLiteralNode ParseStringLiteral()
+    {
+        var location = Location.New(_sourceFile);
+        
+        if (_sourceFile.Current is not '"')
+        {
+            Report.Error("String literal expected.", location);
+        }
+        
+        _sourceFile.MoveNext();
+        
+        var stringLiteral = string.Empty;
+        
+        while (!_sourceFile.EndOfFile)
+        {
+            if (_sourceFile.Current is '"') break;
+
+            stringLiteral += _sourceFile.Current;
+            
+            _sourceFile.MoveNext();
+        }
+
+        if (_sourceFile.Current is not '"')
+        {
+            Report.Error("String literals should end with a quotation mark.", location);
+        }
+        
+        location.End = _sourceFile.CurrentIndex;
+
+        return new StringLiteralNode
+        {
+            Location = location,
+            Text = stringLiteral
+        };
+    }
+    
+    private IdentifierNode ParseIdentifier()
     {
         var location = Location.New(_sourceFile);
         
@@ -122,6 +186,8 @@ public class Parser
             _sourceFile.MoveNext();
         }
 
+        location.End = _sourceFile.CurrentIndex;
+        
         return new IdentifierNode
         {
             Location = location,
@@ -129,7 +195,7 @@ public class Parser
         };
     }
     
-    private SymbolNode ParseSymbolNode()
+    private SymbolNode ParseSymbol()
     {
         if (_sourceFile.Current is not '\'')
         {
@@ -154,6 +220,8 @@ public class Parser
             
             _sourceFile.MoveNext();
         }
+        
+        location.End = _sourceFile.CurrentIndex;
 
         return new SymbolNode
         {
