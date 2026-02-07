@@ -54,10 +54,11 @@ public class Parser
         '"' => ParseStringLiteral(),
         ';' => ParseSingleLineComment(),
         '{' => ParseStruct(),
+        '&' => ParseRestIdentifier(),
         var c when char.IsNumber(c) || c is '.' => ParseNumber(),
         _ => ParseIdentifier()
     };
-    
+
     private SingleLineCommentNode ParseSingleLineComment()
     {
         var location = Location.New(_sourceFile);
@@ -296,6 +297,47 @@ public class Parser
         };
     }
 
+    private RestIdentifierNode ParseRestIdentifier()
+    {
+        if (_sourceFile.Current is not '&')
+        {
+            Report.Error("Expected a rest identifier.", Location.New(_sourceFile));
+        }
+        
+        _sourceFile.MoveNext();
+
+        if (char.IsWhiteSpace(_sourceFile.Current))
+        {
+            Report.Error("Rest identifiers should start right after their declaration.", Location.New(_sourceFile));
+        }
+        
+        var location = Location.New(_sourceFile);
+        var restIdentifier = string.Empty;
+
+        while (!_sourceFile.EndOfFile)
+        {
+            if (_sourceFile.Current is '(')
+            {
+                Report.Error("This cannot be part of the rest identifier.", Location.New(_sourceFile));
+                break;
+            }
+
+            restIdentifier += _sourceFile.Current;
+
+            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is ')') break;
+            
+            _sourceFile.MoveNext();
+        }
+        
+        location.End = _sourceFile.CurrentIndex;
+
+        return new RestIdentifierNode
+        {
+            Location = location,
+            Text = restIdentifier
+        };
+    }
+    
     private StructNode ParseStruct()
     {
         var @struct = new StructNode

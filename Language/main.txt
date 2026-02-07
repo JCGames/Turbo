@@ -3,7 +3,4 @@
 ; a
 ; comment
 
-({
-    name: "bob"
-    hill: "florida"
-})
+(&identifier)
