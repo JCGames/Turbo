@@ -33,6 +33,7 @@ public static class Runner
         StringLiteralNode stringLiteral => new LispStringValue(stringLiteral.Text),
         StructNode structNode => new LispStructValue(structNode.Struct, scope),
         SymbolNode symbol => LispSymbolValue.New(symbol.Text),
+        SingleLineCommentNode => LispVoidValue.Instance,
         _ => throw Report.Error("Incorrect or invalid syntax.", node.Location)
     };
 

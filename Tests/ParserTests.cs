@@ -12,7 +12,6 @@ public class ParserTests
         Report.PreferThrownErrors = true;
     }
     
-    [Ignore]
     [TestMethod]
     public void TestStringLiteralParse()
     {

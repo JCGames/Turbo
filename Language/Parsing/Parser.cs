@@ -55,7 +55,7 @@ public class Parser
         ';' => ParseSingleLineComment(),
         '{' => ParseStruct(),
         '&' => ParseRestIdentifier(),
-        var c when char.IsNumber(c) || c is '.' => ParseNumber(),
+        var c when char.IsNumber(c) || (c is '.' or '-' && char.IsNumber(_sourceFile.Peek)) => ParseNumber(),
         _ => ParseIdentifier()
     };
 
@@ -143,7 +143,7 @@ public class Parser
     {
         var location = Location.New(_sourceFile);
         
-        if (!char.IsNumber(_sourceFile.Current) && _sourceFile.Current is not '.')
+        if (!char.IsNumber(_sourceFile.Current) && _sourceFile.Current is not ('.' or '-'))
         {
             Report.Error("Expected number literal.", location);
         }
@@ -153,7 +153,7 @@ public class Parser
 
         while (!_sourceFile.EndOfFile)
         {
-            if (!char.IsNumber(_sourceFile.Current) && _sourceFile.Current is not '.' && _sourceFile.Current is not ',')
+            if (!char.IsNumber(_sourceFile.Current) && _sourceFile.Current is not ('.' or '-' or ','))
             {
                 Report.Error("This cannot be part of the number.", Location.New(_sourceFile));
                 break;

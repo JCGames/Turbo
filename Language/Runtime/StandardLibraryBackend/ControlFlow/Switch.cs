@@ -23,7 +23,7 @@ public class Switch : ITurboFunction
     {
         if (arguments.Count < 1) throw Report.Error(new WrongArgumentCountReportMessage(ArgumentDeclaration, arguments.Count), function.Location);
 
-        foreach (var parameter in arguments)
+        foreach (var parameter in arguments.Where(x => x is not SingleLineCommentNode))
         {
             if (parameter is not ListNode list) throw Report.Error(new WrongArgumentTypeReportMessage("Switch expects each of it's arguments to be lists."), parameter.Location);
             if (list.Nodes.Count != 2) throw Report.Error(new WrongArgumentTypeReportMessage("Each switch item should have two arguments - a condition and a body."), parameter.Location);
