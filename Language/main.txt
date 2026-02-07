@@ -3,5 +3,4 @@
 ; a
 ; comment
 
-(Turbo:Print ; "Hello, world"
-)
+(Turbo:Print "")

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
-using Turbo.Language.Diagnostics;
+﻿using Turbo.Language.Diagnostics;
 using Turbo.Language.Parsing.Nodes;
 
 namespace Turbo.Language.Parsing;
@@ -8,9 +6,6 @@ namespace Turbo.Language.Parsing;
 public class Parser
 {
     private readonly SourceFile _sourceFile;
-
-    private readonly Func<char, bool> _isCharacterAllowedInIdentifier = c =>
-        c is not ('(' or ')' or '{' or '}' or '"');
     
     public Parser(SourceFile sourceFile)
     {
@@ -97,27 +92,31 @@ public class Parser
         }
         
         _sourceFile.MoveToNonWhiteSpaceCharacter();
-        
-        while (!_sourceFile.EndOfFile)
-        {
-            listNode.Nodes.Add(_sourceFile.Current switch
-            {
-                '(' => ParseList(),
-                '\'' when _sourceFile.Peek is '(' => ParseList(),
-                '\'' => ParseSymbol(),
-                '"' => ParseStringLiteral(),
-                ';' => ParseSingleLineComment(),
-                _ => ParseIdentifier()
-            });
-            
-            _sourceFile.MoveToNonWhiteSpaceCharacter();
 
-            if (_sourceFile.EndOfFile)
+        if (_sourceFile.Current is not ')')
+        {
+            while (!_sourceFile.EndOfFile)
             {
-                Report.Error("Expected another item or a closing parenthesis.", Location.New(_sourceFile));
-            }
+                listNode.Nodes.Add(_sourceFile.Current switch
+                {
+                    '(' => ParseList(),
+                    '\'' when _sourceFile.Peek is '(' => ParseList(),
+                    '\'' => ParseSymbol(),
+                    '"' => ParseStringLiteral(),
+                    ';' => ParseSingleLineComment(),
+                    var c when char.IsNumber(c) || c is '.' => ParseNumber(),
+                    _ => ParseIdentifier()
+                });
             
-            if (_sourceFile.Current is ')') break;
+                _sourceFile.MoveToNonWhiteSpaceCharacter();
+
+                if (_sourceFile.EndOfFile)
+                {
+                    Report.Error("Expected another item or a closing parenthesis.", Location.New(_sourceFile));
+                }
+            
+                if (_sourceFile.Current is ')') break;
+            }
         }
         
         if (_sourceFile.Current is not ')')
@@ -128,6 +127,50 @@ public class Parser
         listNode.Location.End = _sourceFile.CurrentIndex;
         
         return listNode;
+    }
+
+    private NumberLiteralNode ParseNumber()
+    {
+        var location = Location.New(_sourceFile);
+        
+        if (!char.IsNumber(_sourceFile.Current) && _sourceFile.Current is not '.')
+        {
+            Report.Error("Expected number literal.", location);
+        }
+
+        var number = string.Empty;
+        var hasDecimalPoint = false;
+
+        while (!_sourceFile.EndOfFile)
+        {
+            if (!char.IsNumber(_sourceFile.Current) && _sourceFile.Current is not '.' && _sourceFile.Current is not ',')
+            {
+                Report.Error("This cannot be part of the number.", Location.New(_sourceFile));
+                break;
+            }
+
+            switch (_sourceFile.Current)
+            {
+                case '.' when !hasDecimalPoint:
+                    hasDecimalPoint = true;
+                    break;
+                case '.' when hasDecimalPoint:
+                    Report.Error("The number should only have one decimal point.", Location.New(_sourceFile));
+                    break;
+            }
+            
+            number += _sourceFile.Current;
+            
+            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is ')') break;
+            
+            _sourceFile.MoveNext();
+        }
+
+        return new NumberLiteralNode
+        {
+            Location = location,
+            Text = number.Replace(",", string.Empty)
+        };
     }
 
     private StringLiteralNode ParseStringLiteral()
@@ -179,9 +222,15 @@ public class Parser
 
         while (!_sourceFile.EndOfFile)
         {
+            if (_sourceFile.Current is '(')
+            {
+                Report.Error("This cannot be part of the identifier.", Location.New(_sourceFile));
+                break;
+            }
+            
             identifier += _sourceFile.Current;
 
-            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is '(' or ')') break;
+            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is ')') break;
             
             _sourceFile.MoveNext();
         }
@@ -214,9 +263,15 @@ public class Parser
 
         while (!_sourceFile.EndOfFile)
         {
+            if (_sourceFile.Current is '(')
+            {
+                Report.Error("This cannot be part of the symbol.", Location.New(_sourceFile));
+                break;
+            }
+
             symbol += _sourceFile.Current;
 
-            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is '(' or ')') break;
+            if (char.IsWhiteSpace(_sourceFile.Peek) || _sourceFile.Peek is ')') break;
             
             _sourceFile.MoveNext();
         }
