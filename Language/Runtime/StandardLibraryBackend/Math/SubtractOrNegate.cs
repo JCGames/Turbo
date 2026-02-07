@@ -4,7 +4,7 @@ using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
 
-namespace Turbo.Language.Runtime.Standard.Math;
+namespace Turbo.Language.Runtime.StandardLibraryBackend.Math;
 
 public class SubtractOrNegate : ITurboFunction
 {

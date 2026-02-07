@@ -4,13 +4,13 @@ using Turbo.Language.Runtime;
 
 Report.PreferThrownErrors = true;
 
-// var standardLibrary = new SourceFile(new FileInfo("Runtime/StandardLibrary/prelude.lisp"));
+var standardLibrary = new SourceFile(new FileInfo("Runtime/StandardLibrary/prelude.lisp"));
 var sourceFile = new SourceFile(new FileInfo("main.txt"));
 
-// var parserStandardLibrary = new Parser(standardLibrary);
+var parserStandardLibrary = new Parser(standardLibrary);
 var parser = new Parser(sourceFile);
 
-// var standardLibraryList = parserStandardLibrary.ParseFile();
+var standardLibraryNodes = parserStandardLibrary.ParseFile();
 var nodes = parser.ParseFile();
 
 foreach (var node in nodes)
@@ -18,6 +18,4 @@ foreach (var node in nodes)
     node.Print("", Console.Out);
 }
 
-// Runner.Run([..standardLibraryList, ..list]);
-
-Runner.Run(nodes);
+Runner.Run([..standardLibraryNodes, ..nodes]);

@@ -4,7 +4,7 @@ using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
 
-namespace Turbo.Language.Runtime.Standard.Boolean;
+namespace Turbo.Language.Runtime.StandardLibraryBackend.Boolean;
 
 public class LessThan : ITurboFunction
 {
