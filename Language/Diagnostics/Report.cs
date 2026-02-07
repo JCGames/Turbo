@@ -1,18 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Turbo.Language.Diagnostics.Reports;
-using Turbo.Language.Parsing.Nodes.Classifications;
 
 namespace Turbo.Language.Diagnostics;
 
 public static class Report
 {
     public static bool PreferThrownErrors = false;
-
-    [DoesNotReturn]
-    public static Exception Error(ReportMessage reportMessage, Location? location = null)
-    {
-        return Error(reportMessage.Message, location);
-    }
     
     [DoesNotReturn]
     public static Exception Error(string message, Location? location = null)
@@ -57,14 +49,5 @@ public static class Report
         
         Environment.Exit(1);
         return new Exception();
-    }
-
-    [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-    public static void AssertArgumentCount(IEnumerable<IParameterNode> parameters, int realCount, Location? location = null)
-    {
-        if (parameters.Count() != realCount)
-        {
-            throw Error(new WrongArgumentCountReportMessage(parameters, realCount), location);
-        }
     }
 }

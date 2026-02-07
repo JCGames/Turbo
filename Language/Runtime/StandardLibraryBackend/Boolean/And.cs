@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -14,24 +13,22 @@ public class And : ITurboFunction
         {
             Text = "items",
             Location = Location.None
-        },
+        }
     ];
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
 
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count < 2) Report.Error(new WrongArgumentCountReportMessage(Parameters, arguments.Count, 2), function.Location);
-
-        foreach (var parameter in arguments)
+        if (arguments.Count < 2)
         {
-            var value = Runner.EvaluateNode(parameter, scope);
-            
-            if (value is not LispBooleanValue boolValue) throw Report.Error(new WrongArgumentTypeReportMessage("And expects it's arguments to be booleans."), parameter.Location);
-            
-            if (!boolValue.Value) return new LispBooleanValue(false);
+            throw Report.Error("Requires at least two arguments", function.Location);
         }
 
-        return new LispBooleanValue(true);
+        var result = arguments
+            .Select(argument => Runner.EvaluateNode(argument, scope).Cast<LispBooleanValue>(argument.Location))
+            .Any(value => !value.Value);
+        
+        return new LispBooleanValue(result);
     }
 }

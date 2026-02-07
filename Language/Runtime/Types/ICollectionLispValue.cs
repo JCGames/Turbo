@@ -8,6 +8,7 @@ public interface ICollectionLispValue
     public ICollectionLispValue Rest();
     public LispNumberValue Count();
 }
+
 public interface ICollectionLispValue<in TKey> : ICollectionLispValue
     where TKey : LispValue
 {

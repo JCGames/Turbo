@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -24,17 +23,24 @@ public class DefineGlobal : ITurboFunction
 
     public IEnumerable<IParameterNode> Parameters =>  ArgumentDeclaration;
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count != 2) Report.Error(new WrongArgumentCountReportMessage(Parameters, arguments.Count), function.Location);
+        if (arguments.Count != 2)
+        {
+            throw Report.Error("Requires exactly two arguments.", function.Location);
+        }
 
-        if (arguments[0] is not IdentifierNode identifier) throw Report.Error(new WrongArgumentTypeReportMessage($"Expected {Parameters.First().PublicParameterName} to be an {nameof(IdentifierNode)}."), arguments[0].Location);
+        if (arguments[0] is not IdentifierNode identifier)
+        {
+            throw Report.Error($"Expected {Parameters.First().PublicParameterName} to be an {nameof(IdentifierNode)}.", arguments[0].Location);
+        }
+        
         var identifierName = identifier.Text;
         
-        var value = Runner.EvaluateNode(arguments[1], scope);
-        if (value is not LispValue lispValue) throw Report.Error(new WrongArgumentTypeReportMessage($"{value} is not a valid value."), arguments[1].Location);
+        var value = Runner.EvaluateNode(arguments[1], scope)
+            .Cast<LispValue>(arguments[1].Location);
         
-        scope.UpdateGlobalScope(identifierName, lispValue);
+        scope.UpdateGlobalScope(identifierName, value);
         
         return LispVoidValue.Instance;
     }

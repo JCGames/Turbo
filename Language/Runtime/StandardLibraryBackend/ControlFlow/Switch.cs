@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -19,19 +18,32 @@ public class Switch : ITurboFunction
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count < 1) throw Report.Error(new WrongArgumentCountReportMessage(ArgumentDeclaration, arguments.Count), function.Location);
+        if (arguments.Count < 1)
+        {
+            throw Report.Error("Requires at least one argument.", function.Location);
+        }
 
         foreach (var parameter in arguments.Where(x => x is not SingleLineCommentNode))
         {
-            if (parameter is not ListNode list) throw Report.Error(new WrongArgumentTypeReportMessage("Switch expects each of it's arguments to be lists."), parameter.Location);
-            if (list.Nodes.Count != 2) throw Report.Error(new WrongArgumentTypeReportMessage("Each switch item should have two arguments - a condition and a body."), parameter.Location);
+            if (parameter is not ListNode list)
+            {
+                throw Report.Error("Switch expects each of it's arguments to be lists.", parameter.Location);
+            }
 
-            var value = Runner.EvaluateNode(list.Nodes[0], scope);
-            if (value is not LispBooleanValue boolean) throw Report.Error(new WrongArgumentTypeReportMessage("The first item in each switch item should be a boolean."), list.Nodes[0].Location);
-            
-            if (boolean.Value) return Runner.EvaluateNode(list.Nodes[1], scope);
+            if (list.Nodes.Count != 2)
+            {
+                throw Report.Error("Each switch item should have two arguments - a condition and a body.", parameter.Location);
+            }
+
+            var value = Runner.EvaluateNode(list.Nodes[0], scope)
+                .Cast<LispBooleanValue>(list.Nodes[0].Location);
+
+            if (value.Value)
+            {
+                return Runner.EvaluateNode(list.Nodes[1], scope);
+            }
         }
 
         return LispVoidValue.Instance;

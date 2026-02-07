@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -19,25 +18,27 @@ public class Modulo : ITurboFunction
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count < 2) throw Report.Error(new WrongArgumentCountReportMessage(Parameters, arguments.Count, 2), function.Location);
-
-        var accum = GetValue(arguments[0], scope);        
-        foreach (var parameter in arguments[1..])
+        if (arguments.Count < 2)
         {
-            var value = GetValue(parameter, scope);
-            accum %= value;
+            throw Report.Error("Requires at least two arguments.", function.Location);
         }
+
+        var accum = GetValue(arguments[0], scope);
         
+        accum = arguments[1..]
+            .Select(parameter => GetValue(parameter, scope))
+            .Aggregate(accum, (current, value) => current % value);
+
         return new LispNumberValue(accum);
     }
 
-    private decimal GetValue(Node node, LispScope scope)
+    private decimal GetValue(Node node, Runtime.Scope scope)
     {
+        var value = Runner.EvaluateNode(node, scope)
+            .Cast<LispNumberValue>(node.Location);
         
-        var value = Runner.EvaluateNode(node, scope);
-        if (value is not LispNumberValue number) throw Report.Error(new WrongArgumentTypeReportMessage("Multiply requires its arguments to be numbers."), node.Location);
-        return number.Value;
+        return value.Value;
     }
 }

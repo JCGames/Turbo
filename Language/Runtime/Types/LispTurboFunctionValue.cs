@@ -26,7 +26,7 @@ public class LispTurboFunctionValue : LispValue, IExecutableLispValue
         return writer.ToString();
     }
 
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Scope scope)
     {
         return Implementation.Execute(function, arguments, scope);
     }

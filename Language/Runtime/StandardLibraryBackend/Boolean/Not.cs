@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -10,22 +9,24 @@ public class Not : ITurboFunction
 {
     private static readonly List<IParameterNode> ArgumentDeclaration =
     [
-        new IdentifierNode()
+        new IdentifierNode
         {
             Text = "item",
             Location = Location.None
-        },
+        }
     ];
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
-    
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count != 1) Report.Error(new WrongArgumentCountReportMessage(Parameters, arguments.Count), function.Location);
+        if (arguments.Count != 1)
+        {
+            throw Report.Error("Requires exactly one arguments", function.Location);
+        }
+
+        var value = Runner.EvaluateNode(arguments[0], scope).Cast<LispBooleanValue>(arguments[0].Location);
         
-        var value = Runner.EvaluateNode(arguments[0], scope);
-        if (value is not LispBooleanValue boolValue) throw Report.Error(new WrongArgumentTypeReportMessage("Not only works with boolean arguments"), arguments[0].Location);
-        
-        return new LispBooleanValue(!boolValue.Value);
+        return new LispBooleanValue(!value.Value);
     }
 }

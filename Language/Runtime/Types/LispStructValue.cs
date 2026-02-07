@@ -14,7 +14,7 @@ public class LispStructValue : LispValue, ICollectionLispValue<LispStringValue>
         Value = value;
     }
 
-    public LispStructValue(IEnumerable<KeyValueNode> nodes, LispScope scope)
+    public LispStructValue(IEnumerable<KeyValueNode> nodes, Scope scope)
     {
         foreach (var item in nodes)
         {

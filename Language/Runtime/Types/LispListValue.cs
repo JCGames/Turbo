@@ -9,7 +9,7 @@ public class LispListValue : LispValue, ICollectionLispValue<LispNumberValue>
 
     public LispListValue()
     { }
-    public LispListValue(ListNode listNode, LispScope scope)
+    public LispListValue(ListNode listNode, Scope scope)
     {
         foreach (var item in listNode.Nodes)
         {

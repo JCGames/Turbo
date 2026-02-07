@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
@@ -13,9 +12,12 @@ public class DebugRepl : ITurboFunction
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count > 0) throw Report.Error(new WrongArgumentCountReportMessage(ArgumentDeclaration, arguments.Count), function.Location);
+        if (arguments.Count > 0)
+        {
+            throw Report.Error("Does not take any arguments.", function.Location);
+        }
 
         Report.PreferThrownErrors = true;
         
@@ -70,7 +72,7 @@ public class DebugRepl : ITurboFunction
     /// <param name="scope"></param>
     /// <param name="exit">If the command to exit was executed sets exit to true.</param>
     /// <returns>True if a command was consumed, otherwise false.</returns>
-    private bool HandleReplCommand(string command, LispScope scope, ref bool exit)
+    private bool HandleReplCommand(string command, Runtime.Scope scope, ref bool exit)
     {
         switch (command)
         {

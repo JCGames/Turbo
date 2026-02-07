@@ -4,6 +4,6 @@ namespace Turbo.Language.Runtime;
 
 public class Function
 {
-    public ListNode Definition;
-    public List<ListNode> Body;
+    public required ListNode Definition;
+    public required List<ListNode> Body;
 }

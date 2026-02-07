@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -29,14 +28,17 @@ public class If : ITurboFunction
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count < 2) Report.Error(new WrongArgumentCountReportMessage(ArgumentDeclaration, arguments.Count, 2), function.Location);
+        if (arguments.Count < 2)
+        {
+            throw Report.Error("Requires at least two arguments.", function.Location);
+        }
 
-        var condition = Runner.EvaluateNode(arguments[0], scope);
-        if (condition is not LispBooleanValue boolean) throw Report.Error(new WrongArgumentTypeReportMessage("If condition should return a boolean."), arguments[0].Location);
+        var condition = Runner.EvaluateNode(arguments[0], scope)
+            .Cast<LispBooleanValue>(arguments[0].Location);
 
-        if (boolean.Value)
+        if (condition.Value)
         {
             return Runner.EvaluateNode(arguments[1], scope);
         }

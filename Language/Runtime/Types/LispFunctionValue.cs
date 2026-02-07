@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 
@@ -25,13 +24,19 @@ public class LispFunctionValue : LispValue, IExecutableLispValue
     public LispFunctionValue(Node function, List<IParameterNode> parameters, List<ListNode> definition)
     {
         Definition = definition ?? throw new ArgumentNullException(nameof(definition));
-        if (Definition.Count == 0) throw Report.Error(new InvalidFunctionReportMessage("A function must contain a body."), function.Location);
+        if (Definition.Count == 0)
+        {
+            throw Report.Error("A function must contain a body.", function.Location);
+        }
 
         int i;
         for (i = 0; i < parameters.Count; i++)
         {
             if (parameters[i] is KeyValueNode or RestIdentifierNode) break;
-            if (parameters[i] is not IdentifierNode identifier) throw Report.Error(new InvalidFunctionReportMessage("Unexpected parameter type."), parameters[i].Location);
+            if (parameters[i] is not IdentifierNode identifier)
+            {
+                throw Report.Error("Unexpected parameter type.", parameters[i].Location);
+            }
 
             PositionalParameters.Add(identifier);
         }
@@ -39,24 +44,41 @@ public class LispFunctionValue : LispValue, IExecutableLispValue
         for (; i < parameters.Count; i++)
         {
             if (parameters[i] is RestIdentifierNode identifier) break;
-            if (parameters[i] is not KeyValueNode rest) throw Report.Error(new InvalidFunctionReportMessage("Unexpected parameter type."), parameters[i].Location);
-            if (rest.Value is not IdentifierNode value) throw Report.Error(new InvalidFunctionReportMessage("Unexpected parameter type."), rest.Value.Location);
+            if (parameters[i] is not KeyValueNode rest)
+            {
+                throw Report.Error("Unexpected parameter type.", parameters[i].Location);
+            }
+
+            if (rest.Value is not IdentifierNode value)
+            {
+                throw Report.Error("Unexpected parameter value.", rest.Value.Location);
+            }
 
             NamedParameters.Add(rest.Key, value);
         }
 
         for (; i < parameters.Count; i++)
         {
-            if (parameters[i] is not RestIdentifierNode rest) throw Report.Error(new InvalidFunctionReportMessage("Rest parameters must be the final parameter."), parameters[i].Location);
-            if (RestParameter is not null) throw Report.Error(new InvalidFunctionReportMessage("Only one rest parameter is allowed."), RestParameter.Location);
+            if (parameters[i] is not RestIdentifierNode rest)
+            {
+                throw Report.Error("Rest parameters must be the final parameter.", parameters[i].Location);
+            }
+
+            if (RestParameter is not null)
+            {
+                throw Report.Error("Only one rest parameter is allowed.", RestParameter.Location);
+            }
 
             RestParameter = rest;
         }
     }
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Scope scope)
     {
-        if (arguments.Count < PositionalParameters.Count) Report.Error(new WrongArgumentCountReportMessage(PositionalParameters, arguments.Count));
+        if (arguments.Count < PositionalParameters.Count)
+        {
+            throw Report.Error($"Requires at least {PositionalParameters.Count} arguments.", function.Location);
+        }
 
         var newScope = ProcessArguments(arguments, scope);
         
@@ -69,7 +91,7 @@ public class LispFunctionValue : LispValue, IExecutableLispValue
         return result;
     }
 
-    private LispScope ProcessArguments(List<Node> arguments, LispScope scope)
+    private Scope ProcessArguments(List<Node> arguments, Scope scope)
     {
         var newScope = scope.PushScope();
 
@@ -78,7 +100,10 @@ public class LispFunctionValue : LispValue, IExecutableLispValue
         for (; i < PositionalParameters.Count; i++)
         {
             var value = Runner.EvaluateNode(arguments[i], scope);
-            if (value is not LispValue lispValue) throw Report.Error(new WrongArgumentTypeReportMessage($"{value} is not a valid value"), arguments[i].Location);
+            if (value is not LispValue lispValue)
+            {
+                throw Report.Error($"{value} is not a valid value", arguments[i].Location);
+            }
             
             // In this case, it's probably more relevant to show the function definition.
             if (newScope.HasOwnValue(PositionalParameters[i].Text)) throw Report.Error("Attempted to set the same parameter twice", PositionalParameters[i].Location);
@@ -88,8 +113,11 @@ public class LispFunctionValue : LispValue, IExecutableLispValue
         // Process named parameters
         for (; i < NamedParameters.Count && arguments[i] is KeyValueNode keyValue; i++)
         {
-            var value = Runner.EvaluateNode(keyValue, scope); 
-            if (value is not LispValue lispValue) throw Report.Error(new WrongArgumentTypeReportMessage($"{value} is not a valid value"), keyValue.Location);
+            var value = Runner.EvaluateNode(keyValue, scope);
+            if (value is not LispValue lispValue)
+            {
+                throw Report.Error($"{value} is not a valid value", arguments[i].Location);
+            }
             
             // In this case, it's probably more relevant to show the function call.
             if (newScope.HasOwnValue(keyValue.Key.Text)) throw Report.Error("Attempted to set the same parameter twice", keyValue.Location);
@@ -107,12 +135,18 @@ public class LispFunctionValue : LispValue, IExecutableLispValue
         }
 
         if (i == arguments.Count) return newScope;
-        if (RestParameter is null) throw Report.Error(new WrongArgumentCountReportMessage(PositionalParameters, arguments.Count));
+        if (RestParameter is null)
+        {
+            throw Report.Error("Requires a rest parameter.", Definition.FirstOrDefault()?.Location);
+        }
         var restValue = new LispListValue();
         for (; i < arguments.Count; i++)
         {
             var value = Runner.EvaluateNode(arguments[i], scope);
-            if (value is not LispValue lispValue) throw Report.Error(new WrongArgumentTypeReportMessage($"{value} is not a valid value"), arguments[i].Location);
+            if (value is not LispValue lispValue)
+            {
+                throw Report.Error($"{value} is not a valid value", Definition.FirstOrDefault()?.Location);
+            }
             
             restValue.Value.Add(lispValue);
         }

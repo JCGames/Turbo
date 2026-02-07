@@ -1,5 +1,4 @@
 using Turbo.Language.Diagnostics;
-using Turbo.Language.Diagnostics.Reports;
 using Turbo.Language.Parsing.Nodes;
 using Turbo.Language.Parsing.Nodes.Classifications;
 using Turbo.Language.Runtime.Types;
@@ -29,13 +28,19 @@ public class Apply : ITurboFunction
 
     public IEnumerable<IParameterNode> Parameters => ArgumentDeclaration;
     
-    public BaseLispValue Execute(Node function, List<Node> arguments, LispScope scope)
+    public BaseLispValue Execute(Node function, List<Node> arguments, Runtime.Scope scope)
     {
-        if (arguments.Count < 2) Report.Error(new WrongArgumentCountReportMessage(ArgumentDeclaration, arguments.Count), function.Location);
+        if (arguments.Count < 2)
+        {
+            throw Report.Error("Requires at least two arguments.", function.Location);
+        }
         
         var firstArg = Runner.EvaluateNode(arguments[0], scope);
-        
-        if (firstArg is not IExecutableLispValue executable) throw Report.Error(new WrongArgumentTypeReportMessage("Import expects its first argument to be a function."), arguments[0].Location);
+
+        if (firstArg is not IExecutableLispValue executable)
+        {
+            throw Report.Error("Import expects its first argument to be a function.", arguments[0].Location);
+        }
 
         var args = arguments.Skip(1).SelectMany(arg =>
         {

@@ -3,36 +3,36 @@ using Turbo.Language.Runtime.Types;
 
 namespace Turbo.Language.Runtime;
 
-public class LispScope
+public class Scope
 {
     private ImmutableDictionary<string, LispValue> _scope = ImmutableDictionary<string, LispValue>.Empty;
-    private LispScope _global;
-    private readonly LispScope? _parent;
+    private Scope _global;
+    private readonly Scope? _parent;
 
-    public LispScope()
+    public Scope()
     {
         _global = CreateGlobal();
     }
 
-    private LispScope(LispScope? global, LispScope? parent)
+    private Scope(Scope? global, Scope? parent)
     {
         _global = global!;
         _parent = parent;
     }
 
-    private static LispScope CreateGlobal()
+    private static Scope CreateGlobal()
     {
-        var global = new LispScope(null, null);
+        var global = new Scope(null, null);
         global._global = global;
         return global;
     }
 
-    public LispScope PushScope()
+    public Scope PushScope()
     {
         return new(_global, this);
     }
 
-    public LispScope PopScope()
+    public Scope PopScope()
     {
         return _parent ?? throw new InvalidOperationException("Cannot pop scope.");
     }
