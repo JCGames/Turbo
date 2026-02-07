@@ -1,2 +1,1 @@
-(let a 1)
-(print a)
+(def a 1)

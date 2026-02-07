@@ -1,6 +1,3 @@
-﻿; this
-; is
-; a
-; comment
+﻿(import "lib.lisp")
 
-(&identifier)
+(print a)

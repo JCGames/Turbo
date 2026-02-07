@@ -13,9 +13,9 @@ var parser = new Parser(sourceFile);
 var standardLibraryNodes = parserStandardLibrary.ParseFile();
 var nodes = parser.ParseFile();
 
-foreach (var node in nodes)
-{
-    node.Print("", Console.Out);
-}
+// foreach (var node in nodes)
+// {
+//     node.Print("", Console.Out);
+// }
 
 Runner.Run([..standardLibraryNodes, ..nodes]);
